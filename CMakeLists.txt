@@ -1,0 +1,51 @@
+# CMakeLists.txt
+
+cmake_minimum_required(VERSION 3.22)
+
+set(PLUGIN_NAME "SuperSauceDelay")        # <- no spaces here!
+set(PLUGIN_MANUFACTURER "Arian Gholamipour")
+
+set(JUCE_DIR "$ENV{HOME}/JUCE")
+
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
+project(${PLUGIN_NAME} VERSION 0.0.1)
+
+list(APPEND CMAKE_PREFIX_PATH "${JUCE_DIR}")
+add_subdirectory("${JUCE_DIR}" JUCE)
+
+file(GLOB SRC CONFIGURE_DEPENDS "Source/*.cpp" "Source/*.h")
+
+juce_add_plugin(${PLUGIN_NAME}
+    COMPANY_NAME                "${PLUGIN_MANUFACTURER}"
+    FORMATS                     VST3
+    IS_SYNTH                    FALSE
+    NEEDS_MIDI_INPUT            FALSE
+    NEEDS_MIDI_OUTPUT           FALSE
+    IS_MIDI_EFFECT              FALSE
+    EDITOR_WANTS_KEYBOARD_FOCUS FALSE
+    COPY_PLUGIN_AFTER_BUILD     TRUE
+    PRODUCT_NAME                "SuperSauce Delay"   # <- nice name here for DAWs
+)
+
+juce_generate_juce_header(${PLUGIN_NAME})
+
+target_sources(${PLUGIN_NAME} PRIVATE ${SRC})
+
+target_link_libraries(${PLUGIN_NAME} PRIVATE
+    juce::juce_audio_utils
+    juce::juce_audio_processors
+    juce::juce_gui_extra
+    juce::juce_dsp
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags
+)
+
+target_compile_definitions(${PLUGIN_NAME} PRIVATE
+    JUCE_VST3_CAN_REPLACE_VST2=0
+    JUCE_WEB_BROWSER=0
+    JUCE_USE_CURL=0
+    JUCE_DSP_USE_INTEL_MKL=0
+    JUCE_DSP_USE_SHARED_FFTW=0
+    JUCE_DSP_USE_STATIC_FFTW=0
+)
